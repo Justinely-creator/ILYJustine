@@ -406,7 +406,7 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, onCancel, userSettings
     }
 
     if (isOneSittingTooLong) {
-      errors.push(`One-sitting task (${totalTime}h) exceeds your daily available hours (${userSettings.dailyAvailableHours}h)`);
+      errors.push(`One-sitting task (${totalTime}h) exceeds your available hours for that day`);
     }
 
     if (isOneSittingNoTimeSlot) {
