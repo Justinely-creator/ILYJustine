@@ -2827,11 +2827,12 @@ export const moveIndividualSession = (
   if (todayPlan && settings.workDays.includes(new Date().getDay())) {
     const availableSlots = getDailyAvailableTimeSlots(
       new Date(today),
-      settings.dailyAvailableHours,
+      getDaySpecificDailyHours(today, settings),
       fixedCommitments,
       settings.workDays,
       settings.studyWindowStartHour || 6,
-      settings.studyWindowEndHour || 23
+      settings.studyWindowEndHour || 23,
+      settings
     );
     
     if (availableSlots.length > 0) {
