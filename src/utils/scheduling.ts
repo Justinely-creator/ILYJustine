@@ -4142,7 +4142,7 @@ const findSuitableUnderloadedDay = (
 
     // Check if adding this session would create a reasonable workload
     const newWorkload = currentWorkload + session.allocatedHours;
-    if (newWorkload <= avgWorkload + 1 && newWorkload <= settings.dailyAvailableHours) {
+    if (newWorkload <= avgWorkload + 1 && newWorkload <= getDaySpecificDailyHours(underloadedDate, settings)) {
       return underloadedDate;
     }
   }
