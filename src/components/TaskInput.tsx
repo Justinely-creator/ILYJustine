@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Plus, Info, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Task, UserSettings, StudyPlan, FixedCommitment } from '../types';
-import { findNextAvailableTimeSlot, doesCommitmentApplyToDate, getEffectiveStudyWindow } from '../utils/scheduling';
+import { findNextAvailableTimeSlot, doesCommitmentApplyToDate, getEffectiveStudyWindow, getDaySpecificDailyHours } from '../utils/scheduling';
 import TimeEstimationModal from './TimeEstimationModal';
 
 interface TaskInputProps {
