@@ -872,7 +872,7 @@ export const reshuffleStudyPlan = (
     date,
     plannedTasks: [],
     totalStudyHours: 0,
-    availableHours: settings.dailyAvailableHours
+    availableHours: getDaySpecificDailyHours(date, settings)
   }));
 
   // Copy over completed/skipped sessions first
