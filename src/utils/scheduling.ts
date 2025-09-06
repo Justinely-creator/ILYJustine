@@ -4026,8 +4026,19 @@ const applyWorkloadSmoothing = (
   const dailyWorkloads = new Map<string, number>();
   const movableSessions = new Map<string, StudySession[]>();
 
+  // Track which days contain any one-sitting task
+  const daysWithOneSitting = new Set<string>();
+
   for (const plan of studyPlans) {
     dailyWorkloads.set(plan.date, plan.totalStudyHours);
+
+    // Mark days that contain one-sitting tasks
+    if (plan.plannedTasks.some(s => {
+      const t = tasks.find(tt => tt.id === s.taskId);
+      return t?.isOneTimeTask;
+    })) {
+      daysWithOneSitting.add(plan.date);
+    }
 
     // Identify sessions that can be moved (non-one-sitting, non-manual, non-completed)
     const movable = plan.plannedTasks.filter(session => {
@@ -4059,12 +4070,13 @@ const applyWorkloadSmoothing = (
   const overloadThreshold = avgWorkload + (workloadVariation * 0.3);
   const underloadThreshold = avgWorkload - (workloadVariation * 0.3);
 
+  // Exclude days that contain one-sitting tasks from being sources or targets
   const overloadedDays = Array.from(dailyWorkloads.entries())
-    .filter(([, workload]) => workload > overloadThreshold)
+    .filter(([date, workload]) => workload > overloadThreshold && !daysWithOneSitting.has(date))
     .sort(([, a], [, b]) => b - a); // Most overloaded first
 
   const underloadedDays = Array.from(dailyWorkloads.entries())
-    .filter(([, workload]) => workload < underloadThreshold)
+    .filter(([date, workload]) => workload < underloadThreshold && !daysWithOneSitting.has(date))
     .sort(([, a], [, b]) => a - b); // Least loaded first
 
   // Move sessions from overloaded to underloaded days
@@ -4286,10 +4298,10 @@ export const generateNewStudyPlanWithPreservation = (
   // Apply manual schedule preservation (includes fixed sessions)
   const preservedPlans = preserveManualSchedules(result.plans, existingWithFixed, { preserveManualReschedules: true });
 
-  // Apply intelligent workload balancing around one-sitting tasks
-  const balancedPlans = rebalanceAroundOneSittingTasks(preservedPlans, tasks, settings, fixedCommitments);
+  // Skip special rebalancing around one-sitting tasks to avoid evicting other sessions
+  const balancedPlans = preservedPlans;
 
-  // Apply final workload smoothing to minimize daily variation
+  // Apply final workload smoothing (won't move sessions from days with one-sitting tasks)
   const smoothedPlans = applyWorkloadSmoothing(balancedPlans, tasks, settings, fixedCommitments);
 
   // FINAL SAFETY PASS: ensure all previously completed/skipped sessions are preserved exactly as-is
@@ -4311,7 +4323,7 @@ export const generateNewStudyPlanPreservingFixedOnly = (
   const existingWithFixed = markPastSessionsAsSkipped(existingStudyPlans);
   const result = generateNewStudyPlan(tasks, settings, fixedCommitments, existingWithFixed);
   const preservedFixedOnly = preserveManualSchedules(result.plans, existingWithFixed, { preserveManualReschedules: false });
-  const balancedPlans = rebalanceAroundOneSittingTasks(preservedFixedOnly, tasks, settings, fixedCommitments);
+  const balancedPlans = preservedFixedOnly; // do not rebalance around one-sitting tasks
   const smoothedPlans = applyWorkloadSmoothing(balancedPlans, tasks, settings, fixedCommitments);
   const finalPlans = preserveFixedSessionsPostProcessing(smoothedPlans, existingWithFixed);
   return { plans: finalPlans, suggestions: result.suggestions };
