@@ -1065,7 +1065,7 @@ const handleCompromisedSessions = (
       // 3. Session duration is significantly smaller than other sessions of the same task
 
       const dayPlan = studyPlans[item.planIndex];
-      const dayCapacity = settings.dailyAvailableHours;
+      const dayCapacity = (dayPlan.availableHours ?? getDaySpecificDailyHours(planDate, settings));
       const dayUtilization = dayPlan.totalStudyHours / dayCapacity;
 
       const averageSessionLength = sessionItems.reduce((sum, si) => sum + si.session.allocatedHours, 0) / sessionItems.length;
