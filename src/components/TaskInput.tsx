@@ -363,7 +363,7 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask, onCancel, userSettings
   const isImpactValid = formData.impact !== '';
   const isCustomCategoryValid = !showCustomCategory || (formData.customCategory && formData.customCategory.trim().length > 0 && formData.customCategory.trim().length <= 50);
 
-  const isOneSittingTooLong = formData.isOneTimeTask && totalTime > userSettings.dailyAvailableHours;
+  const isOneSittingTooLong = formData.isOneTimeTask && (() => { const date = formData.deadline || today; return totalTime > getDaySpecificDailyHours(date, userSettings); })();
   const isOneSittingNoTimeSlot = formData.isOneTimeTask && !oneSittingTimeSlotCheck.hasAvailableSlot;
 
   // For one-sitting tasks, we ignore start date validation since they don't use start dates
