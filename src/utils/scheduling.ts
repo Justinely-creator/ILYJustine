@@ -3998,7 +3998,7 @@ const rebalanceAroundOneSittingTasks = (
   // Step 3: Calculate daily capacity across all days
   const dailyCapacity = new Map<string, number>();
   for (const plan of rebalancedPlans) {
-    const remainingCapacity = settings.dailyAvailableHours - plan.totalStudyHours;
+    const remainingCapacity = getDaySpecificDailyHours(plan.date, settings) - plan.totalStudyHours;
     dailyCapacity.set(plan.date, Math.max(0, remainingCapacity));
   }
 
