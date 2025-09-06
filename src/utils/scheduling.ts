@@ -1798,7 +1798,7 @@ export const generateNewStudyPlan = (
             date,
             plannedTasks: [],
             totalStudyHours: 0,
-            availableHours: settings.dailyAvailableHours
+            availableHours: getDaySpecificDailyHours(date, settings)
           });
         }
       });
