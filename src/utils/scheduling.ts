@@ -1507,61 +1507,7 @@ export const generateNewStudyPlan = (
         }
 
         if (!scheduledOneSitting) {
-          // Smart fallback: try to find alternative solutions
-          const fallbackResult = handleOneSittingFallback(
-            task,
-            totalHours,
-            daysForTask,
-            dailyRemainingHours,
-            settings
-          );
-
-          if (fallbackResult.scheduled) {
-            // Successfully scheduled with fallback approach
-            let fallbackSessionNumber = 1;
-            for (const { date, hours } of fallbackResult.scheduledSessions) {
-              let dayPlan = studyPlans.find(p => p.date === date)!;
-              const roundedHours = Math.round(hours * 60) / 60;
-
-              // Find available time slot for fallback session
-              const commitmentsForDay = fixedCommitments.filter(commitment => {
-                return doesCommitmentApplyToDate(commitment, date);
-              });
-
-              const timeSlot = findNextAvailableTimeSlot(
-                roundedHours,
-                dayPlan.plannedTasks,
-                commitmentsForDay,
-                settings.studyWindowStartHour || 6,
-                settings.studyWindowEndHour || 23,
-                settings.bufferTimeBetweenSessions || 0,
-                date,
-                settings
-              );
-
-              if (timeSlot) {
-                dayPlan.plannedTasks.push({
-                  taskId: task.id,
-                  scheduledTime: date,
-                  startTime: timeSlot.start,
-                  endTime: timeSlot.end,
-                  allocatedHours: roundedHours,
-                  sessionNumber: fallbackSessionNumber,
-                  isFlexible: true,
-                  status: 'scheduled'
-                });
-
-                fallbackSessionNumber += 1;
-                dayPlan.totalStudyHours = Math.round((dayPlan.totalStudyHours + roundedHours) * 60) / 60;
-                dailyRemainingHours[date] = Math.round((dailyRemainingHours[date] - roundedHours) * 60) / 60;
-              } else {
-                console.log(`No available time slot found for fallback session of task "${task.title}" (${roundedHours}h) on ${date}`);
-              }
-            }
-            totalHours = Math.round((totalHours - fallbackResult.totalScheduled) * 60) / 60;
-          }
-
-          // Track any remaining unscheduled hours
+          // Do NOT split one-sitting tasks. Leave unscheduled to avoid affecting other sessions.
           if (totalHours > 0) {
             unscheduledHours += totalHours;
           }
